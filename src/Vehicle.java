@@ -41,7 +41,7 @@ public class Vehicle{
 
             boolean inputLoop = true;
             while (inputLoop){
-                System.out.print("    Enter YEAR for Vehicle " + vehicleDeterminer + " : ");
+                System.out.print("    Enter YEAR for Vehicle " + vehicleDeterminer + " [YYYY]: ");
                 String yearStr = sc.nextLine();
                 if(isNumeric(yearStr)){
                     this.year = Integer.parseInt(yearStr);

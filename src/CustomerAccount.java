@@ -30,6 +30,16 @@ public class CustomerAccount{
         this.address = sc.nextLine();
     }
 
+    public String askForFnLn(){
+        System.out.print("Enter your First Name: ");
+        String firstName = sc.nextLine();
+        System.out.print("Enter your Last Name: ");
+        String lastName = sc.nextLine();
+        String fnLn = firstName + "," + lastName;
+        return fnLn;
+    }
+    
+
     public int getAccountId(){
         return this.accountId;
     }

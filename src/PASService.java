@@ -103,16 +103,88 @@ public class PASService extends PASRepository{
         boolean exist = checkSelectPolicyExistById(policyId);
         if (exist){
             String updatedDate = repoPolicy.askForUpdatedDate();
-            repoPolicy.setExpireDate(updatedDate);
-            System.out.println("Changes on Expiration of Policy to" + repoPolicy.getExpireDate() + " SUCCESSFUL!");
+            updateTable("policy", "expirationDate = '"+ updatedDate + "'", "policyID = " + policyId + ";");
+            System.out.println("Changes on Expiration of Policy to " + repoPolicy.getExpireDate() + " SUCCESSFUL!");
+            System.out.println("\nUpdated Data: ");
+            checkSelectPolicyExistById(policyId);
+        }
+        else{   
+            System.out.println("\n Invalid: Policy Not Exist!\n");
+        }
+    }
+
+    public void searchCustumerAcc(){         
+        account = new CustomerAccount();
+        String fnLn = account.askForFnLn();
+        String firstName = fnLn.substring(0, fnLn.indexOf(","));
+        String lastName = fnLn.substring(fnLn.indexOf(",") + 1, fnLn.length());
+        if (checkSelectAccExistByFnLn(firstName, lastName)){
+            System.out.println("\nACCOUNT'S DETAILS:");
+            selectDisplayTable("account", " where accountID = '" + repoAccount.getAccountId() + "';");
+            System.out.println("\nACCOUNT'S POLICY DETAILS:");
+            selectDisplayTable("policy", " where accountID = '" + repoAccount.getAccountId() + "';");
+            System.out.println("\nACCOUNT'S POLICY HOLDER DETAILS:");
+            selectDisplayTable("policyholder", " where accountID = '" + repoAccount.getAccountId() + "';");
+            System.out.println();
+        }
+        else{
+            System.out.println("\nInvalid: Account not Exist!\n");
+        }
+
+    }
+
+    public void searchDispPolicy(){               ////////////////////////////////////////////////////////////////
+        policy = new Policy();
+        int policyId = policy.askForPolicyNumber();
+        boolean exist = checkSelectPolicyExistById(policyId);
+        if (exist){
+            System.out.println("\nPOLICY + " + String.format("06d", policyId));
+            selectDisplayTable("policy", " where policyID = '" + policyId + "';");
+
+            System.out.println("\nPOLICY + " + String.format("06d", policyId));
+            selectDisplayTable("policyholder", " where policyID = '" + policyId + "';");
+
+            System.out.println("\nPOLICY + " + String.format("06d", policyId));
+            selectDisplayTable("vehicles", " where policyID = '" + policyId + "';");
+        }
+        else{   
+            System.out.println("\n Invalid: Policy Not Exist!\n");
+        }
+    }
+
+    public void fileClaim(){
+        claim = new Claim();
+        policy = new Policy();
+        int policyId = policy.askForPolicyNumber();
+        boolean exist = checkSelectPolicyExistById(policyId);
+        if(exist){
+            System.out.println("\nPOLICY + " + String.format("06d", policyId));
+            selectDisplayTable("policy", " where policyID = '" + policyId + "';");
+            System.out.println("\nPOLICY + " + policyId);
+            System.out.println("\nPOLICY + " + String.format("06d", policyId));
+            selectDisplayTable("vehicles"," where policyID = '" + policyId + "';");
+            claim.createClaim(repoPolicy);
+            saveeToDb(claim);
         }
         else{
             System.out.println("\n Invalid: Policy Not Exist!\n");
         }
     }
+
+    public void searchDispClaim(){
+        policy = new Policy();
+        claim = new Claim();
+        String claimNumber = claim.askForClaimNumber();
+        int claimId = claim.toClaimIdConfig(claimNumber);
+        boolean exist = selectDisplayTable("claim", " where claimID = '" + claimId + "';");
+        if (exist){
+            System.out.println("\n = CLAIM DETAILS END = \n");
+        }
+        else{   
+            System.out.println("\n Invalid: Claim Number Not Exist!\n");
+        }
+    }
  
-
-
     public boolean checkSelectExistByAccId(String tableToSelect, String columnToSelect, String accountNumber){
         String sqlCommand = "Select * from ";
         String table = tableToSelect;

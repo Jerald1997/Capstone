@@ -24,18 +24,19 @@ public class PASApp {
                         service.cancelPolicy();
                         break;
                     case 4:
-                        
+                        service.fileClaim();
                         break;      
                     case 5:
-                        
+                        service.searchCustumerAcc();
                         break; 
                     case 6:
-                        
+                        service.searchDispPolicy();
                         break;
                     case 7:
-                        
+                        service.searchDispClaim();
                         break;
                     case 8: //Program will exit
+                        System.exit(0);
                         break;               
 
                     default:

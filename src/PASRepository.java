@@ -15,7 +15,7 @@ public class PASRepository {
     CustomerAccount repoAccount;
     Policy repoPolicy;
     PolicyHolder repoPolicyHolder;
-    Vehicle repoVehicle;
+    Vehicle[] repoVehicleArray;
     Claim repoClaim;
     
 
@@ -103,7 +103,7 @@ public class PASRepository {
                         String datafName = dataToFind.substring(0,dataToFind.indexOf('\''));
                         String datalName = dataToFind.substring(dataToFind.indexOf(',') + 2,dataToFind.length());
 
-                        if(datafName.equals( firstName ) && datalName.equals(  lastName )){
+                        if(datafName.equalsIgnoreCase( firstName ) && datalName.equalsIgnoreCase(  lastName )){
                             repoAccount = new CustomerAccount(accountID, firstName, lastName, address); // 
                             exist = true;
                             return exist;
@@ -231,6 +231,28 @@ public class PASRepository {
 
     }
 
+    public void saveeToDb(Claim claim){
+        int policyId = claim.getPolicyId();
+        int accountId = claim.getAccountId();
+        LocalDate dateOfAcc = claim.getDateOfAcc();
+        String addAccHappen = claim.getAddAccHappen();
+        String descOfAcc = claim.getDescOfAcc();
+        String descOfDamage = claim.getDescOfDamage();
+        Double estimatedCostOfRep = claim.getEstimatedCostOfRep();
+
+        
+
+
+        String details = "('" + policyId + "','" + accountId + "','" + dateOfAcc + "','" + addAccHappen + "','" + descOfAcc + "','" + descOfDamage + "','" + estimatedCostOfRep + "')";
+        directCommandToDb("INSERT INTO claim(policyID, accountID, dateOfAcc, addAccHappen, descOfAcc, descOfDamage, estimatedCostOfRep)"
+                        + " VALUES " + details + ";" );
+
+                    System.out.println("INSERT INTO claim(policyID, accountID, dateOfAcc, addAccHappen, descOfAcc, descOfDamage, estimatedCostOfRep)"
+                    + " VALUES " + details + ";" );
+
+    }
+
+
     public boolean selectDisplayTable(String table, String commExtension){
         exist = false;
         try (
@@ -248,20 +270,30 @@ public class PASRepository {
             int rowCount = 0;
             while(rset.next()) {   // Repeatedly process each row
                 if (table.equals("account")){
+                    if(rowCount == 0){
+                        System.out.println("ACCOUNT DETAILS:");
+                        System.out.println("===============================================================================================================================================");
+                        System.out.printf("%-10s %20s %20s %20s \n", "AccountID", "First Name", "Last Name" , "Address");
+                        System.out.println("-----------------------------------------------------------------------------------------------------------------------------------------------");
+                    }
 
                         int accountId = rset.getInt("accountID");
                         String firstName = rset.getString("firstName");
                         String lastName = rset.getString("lastName");
                         String address = rset.getString("address");
-                        int accountID = rset.getInt("accountID");
+                        String accountNumber = String.format("%04d", accountId);
+                        
+                        System.out.printf("%-10s %20s %20s %20s \n", accountNumber, firstName, lastName, address);
         
-                    repoAccount = new CustomerAccount(accountID, firstName, lastName, address); 
+                    repoAccount = new CustomerAccount(accountId, firstName, lastName, address); 
                 }
                     
                 else if(table.equals("policy")){   //////////////////////////////////////////////////////////////////
                     if(rowCount == 0){
-                        System.out.printf("%-10s %20s %20s %20s %20s %29s\n", "Policy ID", "Account ID", "Effectivity Date", "Expiration Date" , "Policy Premium", "No. of Vehicle Enrolled");
-                        System.out.println("===================================================================================================================================");
+                        System.out.println("POLICY DETAILS:");
+                        System.out.println("===============================================================================================================================================");
+                        System.out.printf("%-10s %20s %20s %20s %20s %29s\n", "PolicyID", "AccountID", "Effectivity Date", "Expiration Date" , "Policy Premium", "No. of Vehicle Enrolled");
+                        System.out.println("-----------------------------------------------------------------------------------------------------------------------------------------------");
                     }
 
                     int policyId = rset.getInt("policyID");
@@ -273,12 +305,20 @@ public class PASRepository {
 
                     repoPolicy = new Policy(policyId, accountId, effectDate, expireDate, policyPremium, vehicleNum); 
 
-                    String policyNumber = repoPolicy.toPolicyNumConfig(policyId);   
-                    System.out.printf("%-20s %5s %04d %20s %20s %20.2f %29d\n", policyNumber, "", accountId, effectDate, expireDate, policyPremium, vehicleNum);
+                    String policyNumber = repoPolicy.toPolicyNumConfig(policyId);
+                    String accountNumber = String.format("%04d", accountId); 
+                    String premInDoll =   "$" + String.format("%.2f", policyPremium);
+                    System.out.printf("%-10s %20s %20s %20s %20s %29d\n", policyNumber, accountNumber, effectDate, expireDate, premInDoll, vehicleNum);
         
                 }
                 
                 else if(table.equals("policyholder")){          ////////////////////////////////////////
+                    if(rowCount == 0){
+                        System.out.println("POLICY HOLDER DETAILS:");
+                        System.out.println("===============================================================================================================================================");
+                        System.out.printf("%-15s %10s %15s %15s %12s %15s %20s %20s \n",  "PolicyID", "AccountID", "FirstName", "Last Name", "Address" , "DOB", "Driv.Lic Number", "Dx 1st Issued Date");
+                        System.out.println("-----------------------------------------------------------------------------------------------------------------------------------------------");
+                    }
                     int policyHolderId = rset.getInt("policyHolderID");
                     int policyId = rset.getInt("policyID");
                     int accountId = rset.getInt("accountID"); 
@@ -289,24 +329,77 @@ public class PASRepository {
                     String drivLicNum = rset.getString("drivLicNum");
                     String drivLic1stIssDate = rset.getString("drivLic1stIssDate");
                     
+                    String accountNumber = String.format("%04d", accountId);
+                    String policyNumber = String.format("%06d", policyId);
+                    System.out.printf("%-15s %10s %15s %15s %12s %15s %20s %20s \n", policyNumber, accountNumber, firstName, lastName, address , dob, drivLicNum, drivLic1stIssDate);
+                    
                     repoPolicyHolder = new PolicyHolder(policyHolderId, policyId, accountId, firstName, lastName, address, dob, drivLicNum,drivLic1stIssDate); 
                 }
 
-                else if(table.equals("claim")){
+                else if(table.equals("vehicles")){
+                    repoVehicleArray = new Vehicle[repoPolicy.getVehicleNum()];
+                    if(rowCount == 0){
+                        System.out.println("VEHICLE DETAILS:");
+                        System.out.println("===============================================================================================================================================");
+                        System.out.printf("%-12s %10s %10s %10s %7s %13s %15s %15s %12s %13s\n", "Policy ID", "Account ID", "Make", "Model" , "Year", "Type", "Fuel Type", "Purchase Price", "Color", "Premium");
+                        System.out.println("-----------------------------------------------------------------------------------------------------------------------------------------------");                   
+                    }
+                    int vehicleId = rset.getInt("vehicleID");
+                    int policyId = rset.getInt("policyID");
+                    int accountId = rset.getInt("accountID");
+                    String make = rset.getString("make");
+                    String model = rset.getString("model");
+                    int year = rset.getInt("year");
+                    String type = rset.getString("type");
+                    String fuelType = rset.getString("fuelType");
+                    double purchasePrice = rset.getDouble("purchasePrice");
+                    String color = rset.getString("color");
+                    double premium = rset.getDouble("premium");
 
+                    String accountNumber = String.format("%04d", accountId);
+                    String policyNumber = String.format("%06d", policyId);
+                    String purchPriceInDoll = "$" + String.format("%.2f", purchasePrice);
+                    String premiumInDoll = "$" + String.format("%.2f", premium);
+                    
+                    System.out.printf("%-12s %10s %10s %10s %7d %13s %15s %15s %12s %13s\n", policyNumber, accountNumber, make, model , year, type, fuelType, purchPriceInDoll, color, premiumInDoll);
+                    
+                    repoVehicleArray[rowCount] = new Vehicle(vehicleId, accountId, policyId, year, make, model, type, fuelType, color, purchasePrice, premium);
                 }
-               
+
+                else if(table.equals("claim")){ //////////////////////////////////////////////////////////
+                    if(rowCount == 0){
+                        System.out.println("CLAIM DETAILS: ");
+                        System.out.println("===============================================================================================================================================");
+                        System.out.printf("%-10s %10s %12s %15s %16s %18s %20s %20s \n",  "ClaimID", "PolicyID", "AccountID", "Accident Date", "Acc. Address" , "Acc. Description", "Damage Description", "Repair Est.Cost");
+                        System.out.println("-----------------------------------------------------------------------------------------------------------------------------------------------");
+                    }
+                    int claimId = rset.getInt("claimID");
+                    int policyId = rset.getInt("policyID");
+                    int accountId = rset.getInt("accountID");
+                    String dateOfAccStr = rset.getString("dateOfAcc");
+                    String addAccHappen = rset.getString("addAccHappen");
+                    String descOfAcc = rset.getString("descOfAcc");
+                    String descOfDamage = rset.getString("descOfDamage");
+                    Double estimatedCostOfRep = rset.getDouble("estimatedCostOfRep");
+
+                    repoClaim = new Claim(claimId, policyId, accountId, dateOfAccStr, addAccHappen, descOfAcc, descOfDamage, estimatedCostOfRep);
+                    
+                    String claimNumber = repoClaim.toClaimNumberConfig(claimId);
+                    String policyNumber = String.format("%06d", policyId);
+                    String accountNumber = String.format("%04d", accountId);
+                    String estimatedCostOfRepInDol = String.format("$%.2f", estimatedCostOfRep);
+
+                    System.out.printf("%-10s %10s %12s %15s %16s %18s %20s %20s \n",  claimNumber, policyNumber, accountNumber, dateOfAccStr, addAccHappen, descOfAcc, descOfDamage, estimatedCostOfRepInDol);
+
+                }      
                ++rowCount;
             }
-            System.out.println("===================================================================================================================================");
-            if(commExtension.equals(null)){
-                System.out.println("Total number of records = " + rowCount); // records count
-            }
-
             if (rowCount == 0){
                 exist = false;
             }
             else{
+                System.out.println("===============================================================================================================================================");
+                System.out.println("Records count = " + rowCount); // records count
                 exist =  true;
             }
             
@@ -317,10 +410,10 @@ public class PASRepository {
 
     }
 
+    public void updateTable(String table, String columnChanges, String condition){
+        String sqlCommand = "UPDATE " + table + " SET " + columnChanges + " WHERE " + condition;
+        directCommandToDb(sqlCommand);
 
-
-
-
-    
+    }
     
 }

@@ -71,22 +71,5 @@ public class CustomerAccount{
         System.out.print("Enter your (4-DIGIT) ACCOUNT NUMBER: ");
         String inputAccountNumber = sc.next();
         return inputAccountNumber;
-
     }
-
-    public boolean isNumeric(String inputString) {
-        //check for null and empty string
-        if (inputString == null || inputString.length() == 0) {
-          return false;
-        }
-        try {
-          Integer.parseInt(inputString);
-          return true;
-        } catch (NumberFormatException exception) {
-          return false;
-        }
-    }
-
-
-
 }

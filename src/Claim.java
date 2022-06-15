@@ -7,6 +7,7 @@ public class Claim {
     private int policyId, accountId;
     private double estimatedCostOfRep;
     private LocalDate dateOfAcc; 
+    PASUIException except = new PASUIException();
     
     public Claim(){
     }
@@ -37,36 +38,42 @@ public class Claim {
             String inputMonthStr = sc.nextLine();
             System.out.print("Enter DAY Accident happened [DD] : ");
             String inputDayStr = sc.nextLine();
-            if(dateValid(inputYearStr, inputMonthStr, inputDayStr)){
-                String dateOfAccStr = inputYearStr + "-" + String.format("%02d", Integer.parseInt(inputMonthStr)) + "-" + String.format("%02d", Integer.parseInt(inputDayStr));
-                this.dateOfAcc = LocalDate.parse(dateOfAccStr);
-                inputLoop = false;
-            }
-            else{
-                System.out.println("\nInvalid: Please input valid Date base on format!\n");
-                inputLoop = true;
-            }
-            System.out.print("Enter ADDRESS WHERE ACCIDENT HAPPENED : ");
-            this.addAccHappen = sc.nextLine();
-            System.out.print("Enter DESCRIPTION OF ACCIDENT : ");
-            this.descOfAcc = sc.nextLine();
-            System.out.print("Enter DESCRIPTION OF DAMAGE : ");
-            this.descOfDamage = sc.nextLine();
-            
-            inputLoop = true;
-            while(inputLoop){
-                System.out.print("Enter Estimated COST OF REPAIR ($)  : ");
-                String estimatedCostStr = sc.nextLine();
-                if(isNumeric(estimatedCostStr)){
-                    this.estimatedCostOfRep = Double.parseDouble(estimatedCostStr);
+
+            if(except.isNumeric(inputMonthStr, 1, 12) && except.isNumeric(inputDayStr, 1, 31)){
+                String dateOfAccStr = inputYearStr + "-" + String.format("%02d", Integer.parseInt(inputMonthStr)) + "-" + String.format("%02d", Integer.parseInt(inputDayStr));        
+                if(except.dateValid(dateOfAccStr, "0000-01-01", "now")){
+                    this.dateOfAcc = LocalDate.parse(dateOfAccStr);
                     inputLoop = false;
                 }
                 else{
-                    System.out.println("\nInvalid: Please Enter a valid Number!\n");
                     inputLoop = true;
                 }
             }
+            else{
+                inputLoop = true;
+            }
+
         }
+        System.out.print("Enter ADDRESS WHERE ACCIDENT HAPPENED : ");
+        this.addAccHappen = sc.nextLine();
+        System.out.print("Enter DESCRIPTION OF ACCIDENT : ");
+        this.descOfAcc = sc.nextLine();
+        System.out.print("Enter DESCRIPTION OF DAMAGE : ");
+        this.descOfDamage = sc.nextLine();
+            
+        inputLoop = true;
+        while(inputLoop){
+            System.out.print("Enter Estimated COST OF REPAIR ($)  : ");
+            String estimatedCostStr = sc.nextLine();
+            if(except.isNumeric(estimatedCostStr,0, 999999999)){
+                this.estimatedCostOfRep = Double.parseDouble(estimatedCostStr);
+                inputLoop = false;
+            }
+            else{
+                inputLoop = true;
+            }
+        }
+        
     }
 
     public String toClaimNumberConfig(int claimId){
@@ -87,7 +94,7 @@ public class Claim {
             System.out.print("Enter (Cxxxxxx) CLAIM NUMBER [ex.: C12345] : ");
             claimNumber = sc.nextLine();
             String claimIdStr = claimNumber.substring(1, claimNumber.length());
-            if((claimNumber.charAt(0) == 'c' || claimNumber.charAt(0) == 'C') && claimNumber.length() == 6 && isNumeric(claimIdStr)){;
+            if((claimNumber.charAt(0) == 'c' || claimNumber.charAt(0) == 'C') && claimNumber.length() == 6 && except.isNumeric(claimIdStr,1, 99999)){;
                 inputLoop = false;
             }
             else{
@@ -96,40 +103,6 @@ public class Claim {
             }
         }
         return claimNumber;
-    }
-
-    public boolean isNumeric(String inputString) {
-        //check for null and empty string
-        if (inputString == null || inputString.length() == 0) {
-          return false;
-        }
-        try {
-          Integer.parseInt(inputString);
-          return true;
-        } catch (NumberFormatException exception) {
-          return false;
-        }
-    }
-
-    public boolean dateValid(String inputYearStr, String inputMonthStr, String inputDayStr){
-        boolean validInput = false;
-        if(isNumeric(inputMonthStr) && isNumeric(inputYearStr) && isNumeric(inputDayStr)){
-          
-            if(inputMonthStr.length() > 2 && inputDayStr.length() > 2 && inputYearStr.length() != 4){
-                System.out.println("\n Invalid Date: Please follow the input format for date!\n" );
-                validInput = false;
-                return validInput;
-            }
-            else{
-                validInput = true;
-                return validInput;
-            }
-        }
-        else{
-            System.out.println("\n Invalid Date: Please input a valid number format DATE!\n" );
-            validInput = false;
-            return false;
-        }
     }
 
     public int getClaimId() {

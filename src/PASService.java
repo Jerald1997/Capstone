@@ -7,6 +7,7 @@ public class PASService extends PASRepository{
     Vehicle[] vehicleArray;
     Claim claim;
     RatingEngine ratingEngine;
+    PASUIException except = new PASUIException();
     
     public void createAccount(){
         account = new CustomerAccount();
@@ -14,28 +15,25 @@ public class PASService extends PASRepository{
         String firstName = account.getFirstName();
         String lastName = account.getLastName();
         
-        if(checkSelectAccExistByFnLn(firstName, lastName) == false){
+        boolean exist = selectDisplayTable("account", " where (firstName, lastName) = ('" + firstName + "','" + lastName + "');");
+        if((exist) == false){
             saveeToDb(account);
+            selectDisplayTable("account", " where (firstName, lastName) = ('" + firstName + "','" + lastName + "');");
         }
         else{
-            String accountNumber = account.toAccountNumberConfig(super.repoAccount.getAccountId());
-            System.out.println("\n Account Already Exist with Account Number: "+ accountNumber + "\n");  
-        }
-
-        account.getFirstName();
-        repoAccount.getFirstName();
-        
+            System.out.println("\n Account Already Exist with DETAILS DISPLAY ABOVE!");  
+        }   
     }
 
     public void getPolicy(){
-
         account = new CustomerAccount();
         String accountNumber = account.askAccNum();
-        if(account.isNumeric(accountNumber) && accountNumber.length() == 4){        // if input is a 4 - digit number
+        if(except.isNumeric(accountNumber, 1, 9999)){        // if input is a 4 - digit number
             
-            if(checkSelectExistByAccId("account", "accountID", accountNumber)){                             // if account number is existing on DB
+            boolean exist = selectDisplayTable("account", " where accountID = " + accountNumber + ";");
+            if(exist){                             // if account number is existing on DB
                 System.out.println("\nHi " + super.repoAccount.getFirstName() +"!" );
-                
+
                 policy = new Policy();                                          //begin policy creation
                 policy.createPolicy(repoAccount); 
 
@@ -46,6 +44,7 @@ public class PASService extends PASRepository{
                 int vehicleNum = vehicle.askForVehicleNum();
                 policy.setVehicleNum(vehicleNum);
                 vehicleArray = new Vehicle[vehicleNum];
+
                 for(int counter = 0; counter < vehicleNum; counter++ ){
                     vehicleArray[counter] = new Vehicle();
                     vehicleArray[counter].createVehicle(repoAccount, policy, counter, ratingEngine);
@@ -57,7 +56,8 @@ public class PASService extends PASRepository{
                 if (acceptConfirm){                                         /// If policy was accepted save the record on database
 
                     saveeToDb(policy);
-                    if(checkSelectExistByAccId("policy", "accountID", accountNumber)){
+                    exist = selectDisplayTable("policy", " where accountID = " + accountNumber + ";");
+                    if(exist){
                         System.out.println("***Status: Policy record saved successfully!");
                     }
                     else{
@@ -66,7 +66,8 @@ public class PASService extends PASRepository{
 
                     policyHolder.setPolicyId(repoPolicy.getPolicyId());
                     saveeToDb(policyHolder);
-                    if(checkSelectExistByAccId("policyholder", "accountID", accountNumber)){
+                    exist = selectDisplayTable("policyholder", " where accountID = " + accountNumber + ";");
+                    if(exist){
                         System.out.println("***Status: Policy Holder's record saved successfully!");
                     }
                     else{
@@ -78,7 +79,7 @@ public class PASService extends PASRepository{
                         saveeToDb(vehicleArray[counter]);
                     }
                     
-               
+                    System.out.println("\n***Status: You successfully bought a policy!\n");
                 }
 
                 else{
@@ -91,7 +92,7 @@ public class PASService extends PASRepository{
             }
         }
         else{                                                                       //if its not a 4 digit number
-            System.out.println("\n Invalid: Please input 4-DIGIT NUMBER ONLY! \n");
+            System.out.println("\n Try again.. \n");
         }
         
         RatingEngine.setPolicyPremium(0);
@@ -100,13 +101,13 @@ public class PASService extends PASRepository{
     public void cancelPolicy(){
         policy = new Policy();
         int policyId = policy.askForPolicyNumber();
-        boolean exist = checkSelectPolicyExistById(policyId);
+        boolean exist = selectDisplayTable("policy", " where policyID = '" + policyId + "';");
         if (exist){
             String updatedDate = repoPolicy.askForUpdatedDate();
             updateTable("policy", "expirationDate = '"+ updatedDate + "'", "policyID = " + policyId + ";");
             System.out.println("Changes on Expiration of Policy to " + repoPolicy.getExpireDate() + " SUCCESSFUL!");
             System.out.println("\nUpdated Data: ");
-            checkSelectPolicyExistById(policyId);
+            selectDisplayTable("policy", " where policyID = '" + policyId + "';");
         }
         else{   
             System.out.println("\n Invalid: Policy Not Exist!\n");
@@ -118,12 +119,12 @@ public class PASService extends PASRepository{
         String fnLn = account.askForFnLn();
         String firstName = fnLn.substring(0, fnLn.indexOf(","));
         String lastName = fnLn.substring(fnLn.indexOf(",") + 1, fnLn.length());
-        if (checkSelectAccExistByFnLn(firstName, lastName)){
-            System.out.println("\nACCOUNT'S DETAILS:");
-            selectDisplayTable("account", " where accountID = '" + repoAccount.getAccountId() + "';");
-            System.out.println("\nACCOUNT'S POLICY DETAILS:");
+        boolean exist = selectDisplayTable("account", " where (firstName, lastName) = ('" + firstName + "','" + lastName + "');");
+
+        if (exist){
+            System.out.println("\nACCOUNT " + String.format("%04d", repoAccount.getAccountId()));
             selectDisplayTable("policy", " where accountID = '" + repoAccount.getAccountId() + "';");
-            System.out.println("\nACCOUNT'S POLICY HOLDER DETAILS:");
+            System.out.println("\nACCOUNT " + String.format("%04d", repoAccount.getAccountId()));
             selectDisplayTable("policyholder", " where accountID = '" + repoAccount.getAccountId() + "';");
             System.out.println();
         }
@@ -133,14 +134,11 @@ public class PASService extends PASRepository{
 
     }
 
-    public void searchDispPolicy(){               ////////////////////////////////////////////////////////////////
+    public void searchDispPolicy(){          
         policy = new Policy();
         int policyId = policy.askForPolicyNumber();
-        boolean exist = checkSelectPolicyExistById(policyId);
+        boolean exist = selectDisplayTable("policy", " where policyID = '" + policyId + "';");
         if (exist){
-            System.out.println("\nPOLICY + " + String.format("06d", policyId));
-            selectDisplayTable("policy", " where policyID = '" + policyId + "';");
-
             System.out.println("\nPOLICY + " + String.format("06d", policyId));
             selectDisplayTable("policyholder", " where policyID = '" + policyId + "';");
 
@@ -156,12 +154,9 @@ public class PASService extends PASRepository{
         claim = new Claim();
         policy = new Policy();
         int policyId = policy.askForPolicyNumber();
-        boolean exist = checkSelectPolicyExistById(policyId);
+        boolean exist = selectDisplayTable("policy", " where policyID = '" + policyId + "';");
         if(exist){
-            System.out.println("\nPOLICY + " + String.format("06d", policyId));
-            selectDisplayTable("policy", " where policyID = '" + policyId + "';");
-            System.out.println("\nPOLICY + " + policyId);
-            System.out.println("\nPOLICY + " + String.format("06d", policyId));
+            System.out.println("\nPOLICY + " + String.format("%06d", policyId));
             selectDisplayTable("vehicles"," where policyID = '" + policyId + "';");
             claim.createClaim(repoPolicy);
             saveeToDb(claim);
@@ -184,35 +179,6 @@ public class PASService extends PASRepository{
             System.out.println("\n Invalid: Claim Number Not Exist!\n");
         }
     }
- 
-    public boolean checkSelectExistByAccId(String tableToSelect, String columnToSelect, String accountNumber){
-        String sqlCommand = "Select * from ";
-        String table = tableToSelect;
-        String column = columnToSelect;
-        String dataToFind = accountNumber;
-
-        boolean exist = testExistOnDb(sqlCommand, table, column, dataToFind);
-        return exist;
-        
-    }
-
-    public boolean checkSelectAccExistByFnLn(String firstName, String lastName){    //Firstname and Lastname
-        String sqlCommand = "Select * from ";
-        String table = "account";
-        String column = "firstName,lastName";
-        String dataToFind = firstName + "','" + lastName ;
-
-        boolean exist = testExistOnDb(sqlCommand, table, column, dataToFind);
-        return exist;
-    }
-
-    public boolean checkSelectPolicyExistById(int policyId){  
-        String table = "policy";
-        String commExtension = " where policyID = " + policyId + ";";
-
-        boolean exist = selectDisplayTable(table, commExtension);
-        return exist;
-    }
 
     public void display(){
         System.out.println("===============================================");
@@ -228,8 +194,4 @@ public class PASService extends PASRepository{
         System.out.print("    What to do? \n");
         System.out.print("    Enter a number (1-8): ");
     }
-
-    
-
-
 }

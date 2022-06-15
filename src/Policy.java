@@ -1,15 +1,12 @@
 import java.util.Scanner;
 import java.time.LocalDate;
-import java.util.Calendar;
-
 
 public class Policy extends Vehicle{
     private int policyId, accountId, dlx, vehicleNum;  
     private String effectMonth, effectDay, effectYear, effectDateStr;
-    // private String expireMonth, expireDay, expireYear, expireDateStr;
     private LocalDate effectDate, expireDate;
-
-    private double policyPremium;      
+    private double policyPremium;   
+    PASUIException except = new PASUIException();   
 
     public Policy (int policyId, int accountId, String effectDateStr, String expiretDateStr, double policyPremium, int vehicleNum){
         this.policyId = policyId;
@@ -39,18 +36,19 @@ public class Policy extends Vehicle{
             System.out.print("Enter number for the DAY OF EFFECTIVITY (1-31): ");
             this.effectDay = sc.next();
 
-            if (dateValid(effectYear, effectMonth, effectDay)){
-                this.effectYear = effectYear;
+            if(except.isNumeric(effectMonth, 1, 12) && except.isNumeric(effectDay, 1, 31)){
                 this.effectMonth = String.format("%02d", Integer.parseInt(effectMonth));
                 this.effectDay = String.format("%02d", Integer.parseInt(effectDay));
-                this.effectDateStr = this.effectYear + "-" + this.effectMonth +"-" + this.effectDay;
-                this.effectDate = LocalDate.parse(this.effectDateStr);
-                this.expireDate = effectDate.plusMonths(6);
 
-                System.out.println(effectDate);
-                System.out.println(expireDate);
-                
-                inputLoop = false; 
+                this.effectDateStr = this.effectYear + "-" + this.effectMonth +"-" + this.effectDay;
+                if (except.dateValid(effectDateStr, "now", "9999-01-01")){
+                    this.effectDate = LocalDate.parse(this.effectDateStr);
+                    this.expireDate = effectDate.plusMonths(6);                
+                    inputLoop = false; 
+                }
+            }
+            else{
+                inputLoop = true;
             }
 
         } 
@@ -63,13 +61,12 @@ public class Policy extends Vehicle{
         while(inputLoop){
             System.out.print("Enter (6-Digit) POLICY NUMBER: ");
             String policyNumberStr = sc.nextLine();
-            if(isNumeric(policyNumberStr) && policyNumberStr.length() == 6){
+            if(except.isNumeric(policyNumberStr, 1, 999999)){
                 inputLoop = false;
                 policyNumber = Integer.parseInt(policyNumberStr);
                 return policyNumber;
             }
             else{
-                System.out.println("\nInvalid: Please input 6-DIGIT NUMBER ONLY.\n");
                 inputLoop = true;
             }
         }
@@ -87,13 +84,15 @@ public class Policy extends Vehicle{
             System.out.print("Change expiration Day from " + this.expireDate.getDayOfMonth() + " to [1-31]: ");
             String updateDayStr = sc.nextLine();
 
-            if(dateValid(updateYearStr, updateMonthStr, updateDayStr)){
-                inputLoop = false;
+            if(except.isNumeric(updateMonthStr, 1, 12) && except.isNumeric(updateDayStr, 1, 31)){
                 updatedExpDate = updateYearStr + "-" + String.format( "%02d", Integer.parseInt(updateMonthStr)) +"-" + String.format( "%02d",Integer.parseInt(updateDayStr));
-            }
-            else{
-                System.out.println("\nInvalid: Please input valid Date!\n");
-                inputLoop = true;
+                String expString = this.getExpireDate().toString();
+                if(except.dateValid(updatedExpDate, "now", expString)){
+                    inputLoop = false;
+                }
+                else{
+                    inputLoop = true;
+                }
             }
 
         }
@@ -111,7 +110,7 @@ public class Policy extends Vehicle{
                               +"      [1] - for YES");
             System.out.print("Enter your choice [0/1] : ");
             String choice = sc.nextLine();
-            if(isNumeric(choice)){
+            if(except.isNumeric(choice, 0, 1)){
 
                 if(choice.equals("0")){
                     accept =  false;
@@ -122,42 +121,16 @@ public class Policy extends Vehicle{
                     inputLoop = false;
                 }
                 else {
-                    System.out.println("\nInvalid: Out of Choices. Please choose 0 or 1 ONLY\n");
+                    System.out.println("\nPlease choose 0 or 1 ONLY..\n");
                     inputLoop = true;
                 }    
             }
             else{
-                System.out.println("\nInvalid: Please input number only!\n");
                 inputLoop = true;
             }
         }
         return accept;
         
-    }
-
-    public boolean isNumeric(String inputString) {
-        //check for null and empty string
-        if (inputString == null || inputString.length() == 0) {
-          return false;
-        }
-        try {
-          Integer.parseInt(inputString);
-          return true;
-        } catch (NumberFormatException exception) {
-          return false;
-        }
-    }
-
-    public boolean dateValid(String inputYearStr, String inputMonthStr, String inputDayStr){
-        boolean validInput = false;
-        if(isNumeric(inputMonthStr) && isNumeric(inputYearStr) && isNumeric(inputDayStr)){
-                validInput =  true;
-        }
-        else{
-            System.out.println("\n Invalid Date: Please input a valid number format DATE!\n" );
-            validInput = false;
-        }
-        return validInput;
     }
 
     public String toPolicyNumConfig(int policyId){

@@ -5,10 +5,9 @@ public class Vehicle{
     private int vehicleId, accountId, policyId, year, carYear;
     private String make, model, type, fuelType, color;
     private double purchasePrice, eachVehiclePremium;
+    PASUIException except = new PASUIException();
 
     public Vehicle(){
-
-
     }
     
     public Vehicle(int vehicleId, int accountId, int policyId, int year, String make, String model, String type,
@@ -16,7 +15,7 @@ public class Vehicle{
         this.vehicleId = vehicleId;
         this.accountId = accountId;
         this.policyId = policyId;
-        this.year = year;         /////
+        this.year = year;         
         this.make = make;
         this.model = model;
         this.type = type;
@@ -43,12 +42,11 @@ public class Vehicle{
             while (inputLoop){
                 System.out.print("    Enter YEAR for Vehicle " + vehicleDeterminer + " [YYYY]: ");
                 String yearStr = sc.nextLine();
-                if(isNumeric(yearStr)){
+                if(except.isNumeric(yearStr,1000,9999)){
                     this.year = Integer.parseInt(yearStr);
                     inputLoop = false;
                 }
                 else{
-                    System.out.println("\n Invalid: Please input a valid number only!\n");
                     inputLoop = true;
                 }
             }
@@ -63,12 +61,11 @@ public class Vehicle{
             while (inputLoop){
                 System.out.print("    Enter PURCHASE PRICE for Vehicle " + vehicleDeterminer + " : ");
                 String purchasePriceStr = sc.nextLine();
-                if(isNumeric(purchasePriceStr)){
+                if(except.isNumeric(purchasePriceStr, 1, 999999999)){
                     this.purchasePrice = Double.parseDouble(purchasePriceStr);
                     inputLoop = false;
                 }
                 else{
-                    System.out.println("\n Invalid: Please input a valid number only!\n");
                     inputLoop = true;
                 }
             }
@@ -101,29 +98,16 @@ public class Vehicle{
 
         boolean inputLoop = true;
         while (inputLoop){
-            if(isNumeric(vehicleNumStr)){
+            if(except.isNumeric(vehicleNumStr,1, 999999)){
                 vehicleNum = Integer.parseInt(vehicleNumStr);
                 return vehicleNum;
             }
             else{
-                System.out.println("Invalid: Please input a valid number only!");
+                inputLoop = true;
             }
         }
-        
+    
         return vehicleNum;
-    }
-
-    public boolean isNumeric(String inputString) {
-        //check for null and empty string
-        if (inputString == null || inputString.length() == 0) {
-          return false;
-        }
-        try {
-          Integer.parseInt(inputString);
-          return true;
-        } catch (NumberFormatException exception) {
-          return false;
-        }
     }
 
     public void dispPremiumBreakDown(int vehicleNum, Vehicle[] vehicleArray){

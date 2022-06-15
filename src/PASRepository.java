@@ -6,10 +6,7 @@ import java.sql.Statement;
 import java.time.LocalDate;
 
 public class PASRepository {
-
-
-    String sqlCommand;
-    String details;
+    String sqlCommand, details;
     boolean exist;
 
     CustomerAccount repoAccount;
@@ -18,149 +15,18 @@ public class PASRepository {
     Vehicle[] repoVehicleArray;
     Claim repoClaim;
     
-
     public void directCommandToDb(String sqlCommand){
         try (
             // a database connection "conn"
             Connection conn = DriverManager.getConnection( "jdbc:mysql://localhost:3306/pas_system","root", "JR@norima2022"); 
-            
             Statement stmt = conn.createStatement();                          //statement object inside the connection
            ){        
-   
-            System.out.println("The SQL statement is: " + sqlCommand + "\n");  // Echo For debugging
             stmt.executeUpdate(sqlCommand);
-            
-
-            // ResultSet rset = stmt.executeQuery(sqlCommand);                    // rset - ResultSet object where query result was get/set or return
-
-            // System.out.println("The records selected are:");  
-            // int rowCount = 0;
-            // // table header
-            // System.out.printf("%-5s %10s %18s %18s %n","Policy Number", "User ID", "Date Registered", "Policy Type ID");
-            // System.out.println("---------------------------------------------------------------");
-   
-            // while(rset.next()) {   // Repeatedly process each row
-               
-            //    String policy_no = rset.getString("policy_no");          // retrieve a policy no in the row
-            //    int user_id = rset.getInt("user_id");                    // retrieve a user ID in the row
-            //    Date date_registered = rset.getDate("date_registered");  // retrieve a date registered in the row
-            //    String policy_type_id = rset.getString("policy_type_id"); // retrieve a policy type id in the row
-            //    System.out.printf("%-5s %15d %15s %13s %n", policy_no, user_id, date_registered, policy_type_id); //display format
-            //    ++rowCount;
-            // }
-            // System.out.println("Total number of records = " + rowCount); // records count
-        } catch(SQLException ex) {
+        } 
+        catch(SQLException ex) {
             ex.printStackTrace();   
         }
     }
-
-    public boolean testExistOnDb(String sqlCommand,String table, String column, String dataToFind){
-        exist = false;
-        try (
-            // a database connection "conn"
-            Connection conn = DriverManager.getConnection( "jdbc:mysql://localhost:3306/pas_system","root", "JR@norima2022"); 
-            
-            Statement stmt = conn.createStatement();                          //statement object inside the connection
-           ){        
-            
-            if(table.equals("account")){
-                sqlCommand = sqlCommand + " " + table +" where (" + column + ") = ('" + dataToFind + "');";
-            }
-            else if(table.equals("policy")){
-            //    Select * from  policy where (policyID,accountID) = ((Select max(policyID) from policy), dataToFind);
-                sqlCommand = sqlCommand + " " + table + " where (" +"policyID," + column + ") = ((Select max(policyID) from policy), " + dataToFind + ");";
-            }
-            else if(table.equals("policyholder")){
-                sqlCommand = sqlCommand + " " + table + " where (" +"policyHolderID," + column + ") = ((Select max(policyHolderID) from policyholder), " + dataToFind + ");";
-            }
-
-
-            System.out.println(sqlCommand);  // Echo For debugging            
-
-            ResultSet rset = stmt.executeQuery(sqlCommand);                    // rset - ResultSet object where query result was get/set or return
-            int rowCount = 0;
-            while(rset.next()) {   // Repeatedly process each row
-                if (table.equals("account")){
-                    try {
-                        int intDataToFind = Integer.parseInt(dataToFind);
-                        int accountId = rset.getInt("accountID");
-                        String firstName = rset.getString("firstName");
-                        String lastName = rset.getString("lastName");
-                        String address = rset.getString("address");
-                        int accountID = rset.getInt("accountID");
-
-                        if(intDataToFind == accountId){
-                            repoAccount = new CustomerAccount(accountID, firstName, lastName, address); 
-                            exist = true;
-                            return exist;
-                        }
-                        
-                    } catch (NumberFormatException exception) {
-                        String firstName = rset.getString("firstName");
-                        String lastName = rset.getString("lastName");
-                        String address = rset.getString("address");
-                        int accountID = rset.getInt("accountID");
-                        String datafName = dataToFind.substring(0,dataToFind.indexOf('\''));
-                        String datalName = dataToFind.substring(dataToFind.indexOf(',') + 2,dataToFind.length());
-
-                        if(datafName.equalsIgnoreCase( firstName ) && datalName.equalsIgnoreCase(  lastName )){
-                            repoAccount = new CustomerAccount(accountID, firstName, lastName, address); // 
-                            exist = true;
-                            return exist;
-                        }
-                    }
-                }
-                else if(table.equals("policy")){   //////////////////////////////////////////////////////////////////
-                    int intDataToFind = Integer.parseInt(dataToFind);
-                    int policyId = rset.getInt("policyID");
-                    int accountId = rset.getInt("accountID");
-                    String effectDate = rset.getString("effectiveDate");
-                    String expireDate = rset.getString("expirationDate");
-                    double policyPremium = rset.getDouble("policyPremium");
-                    int vehicleNum = rset.getInt("vehicleNum");
-                    
-
-                    if(intDataToFind == accountId){
-                        repoPolicy = new Policy(policyId, accountId, effectDate, expireDate, policyPremium, vehicleNum); 
-                        exist = true;
-                        return exist;
-                    }
-                }
-                else if(table.equals("policyholder")){          ////////////////////////////////////////
-                    int intDataToFind = Integer.parseInt(dataToFind);
-                    int policyHolderId = rset.getInt("policyHolderID");
-                    int policyId = rset.getInt("policyID");
-                    int accountId = rset.getInt("accountID"); 
-                    String firstName = rset.getString("firstName");
-                    String lastName = rset.getString("lastName");
-                    String address = rset.getString("address");
-                    String dob = rset.getString("dob");
-                    String drivLicNum = rset.getString("drivLicNum");
-                    String drivLic1stIssDate = rset.getString("drivLic1stIssDate");
-                    
-
-                    if(intDataToFind == accountId){
-                        repoPolicyHolder = new PolicyHolder(policyHolderId, policyId, accountId, firstName, lastName, address, dob, drivLicNum,drivLic1stIssDate); 
-                        exist = true;
-                        return exist;
-                    }
-                }
-
-                else if(table.equals("claim")){
-
-                }
-               
-               ++rowCount;
-            }
-            System.out.println("Total number of records = " + rowCount); // records count
-            
-        } catch(SQLException ex) {
-            ex.printStackTrace();   
-        }
-        return exist;
-    }
-
-    
 
     public void saveeToDb(CustomerAccount account){
         String firstName = account.getFirstName();
@@ -182,10 +48,7 @@ public class PASRepository {
 
         String details = "('"+ accountId + "','" + effectDate + "','" + expireDate + "','" + policyPremium + "','" + vehicleNum + "')";
         directCommandToDb("INSERT INTO policy(accountID, effectiveDate, expirationDate, policyPremium, vehicleNum)"
-                        + " VALUES "+details + ";" );
-
-                     System.out.println("INSERT INTO policy(accountID, effectiveDate, expirationDate, policyPremium, vehicleNum)"  //echo for debugging only
-                                        + " VALUES "+details + ";");   
+                        + " VALUES "+details + ";" );   
 
         System.out.println("\n  \n POlICY (6-MONTHS FROM DATE OF EFFECTIVITY) TERM SAVED! \n \n");
     }
@@ -203,10 +66,6 @@ public class PASRepository {
         String details = "('" + policyId + "','" + accountId + "','" + firstName + "','" + lastName + "','" + address + "','" + dob + "','" + drivLicNum + "','" + drivLic1stIssDate + "')";
         directCommandToDb("INSERT INTO policyholder( policyID, accountID, firstName, lastName, address, dob, drivLicNum, drivLic1stIssDate)"
                         + " VALUES " + details + ";" );
-
-                    System.out.println("INSERT INTO policyholder(firstName, lastName, accountID, policyID, dob, address, drivLicNum, drivLic1stIssDate)"
-                        + "VALUES" + details + ";" );
-
     }
 
     public void saveeToDb(Vehicle vehicle){
@@ -221,14 +80,9 @@ public class PASRepository {
         String color = vehicle.getColor();
         double eachVehiclePremium = vehicle.getEachVehiclePremium();
 
-
         String details = "('" + accountId + "','" + policyId + "','" + make + "','" + model + "','" + year + "','" + type + "','" + fuelType + "','" + purchasePrice + "','" + color + "','" + eachVehiclePremium + "')";
         directCommandToDb("INSERT INTO vehicles(accountID, policyID, make, model, year, type, fuelType, purchasePrice, color, premium )"
                         + " VALUES " + details + ";" );
-
-                    System.out.println("INSERT INTO vehicles(accountID, policyID, make, model, year, type, fuelType, purchasePrice, color, premium )"
-                    + " VALUES " + details + ";" );
-
     }
 
     public void saveeToDb(Claim claim){
@@ -240,16 +94,9 @@ public class PASRepository {
         String descOfDamage = claim.getDescOfDamage();
         Double estimatedCostOfRep = claim.getEstimatedCostOfRep();
 
-        
-
-
         String details = "('" + policyId + "','" + accountId + "','" + dateOfAcc + "','" + addAccHappen + "','" + descOfAcc + "','" + descOfDamage + "','" + estimatedCostOfRep + "')";
         directCommandToDb("INSERT INTO claim(policyID, accountID, dateOfAcc, addAccHappen, descOfAcc, descOfDamage, estimatedCostOfRep)"
                         + " VALUES " + details + ";" );
-
-                    System.out.println("INSERT INTO claim(policyID, accountID, dateOfAcc, addAccHappen, descOfAcc, descOfDamage, estimatedCostOfRep)"
-                    + " VALUES " + details + ";" );
-
     }
 
 
@@ -258,13 +105,9 @@ public class PASRepository {
         try (
             // a database connection "conn"
             Connection conn = DriverManager.getConnection( "jdbc:mysql://localhost:3306/pas_system","root", "JR@norima2022"); 
-            
             Statement stmt = conn.createStatement();                          //statement object inside the connection
            ){        
-
-                sqlCommand = "Select * from " + table + commExtension;
-            
-            System.out.println(sqlCommand);  // Echo For debugging            
+                sqlCommand = "Select * from " + table + commExtension;           
 
             ResultSet rset = stmt.executeQuery(sqlCommand);                    // rset - ResultSet object where query result was get/set or return
             int rowCount = 0;
@@ -276,7 +119,6 @@ public class PASRepository {
                         System.out.printf("%-10s %20s %20s %20s \n", "AccountID", "First Name", "Last Name" , "Address");
                         System.out.println("-----------------------------------------------------------------------------------------------------------------------------------------------");
                     }
-
                         int accountId = rset.getInt("accountID");
                         String firstName = rset.getString("firstName");
                         String lastName = rset.getString("lastName");
@@ -288,7 +130,7 @@ public class PASRepository {
                     repoAccount = new CustomerAccount(accountId, firstName, lastName, address); 
                 }
                     
-                else if(table.equals("policy")){   //////////////////////////////////////////////////////////////////
+                else if(table.equals("policy")){   
                     if(rowCount == 0){
                         System.out.println("POLICY DETAILS:");
                         System.out.println("===============================================================================================================================================");
@@ -312,7 +154,7 @@ public class PASRepository {
         
                 }
                 
-                else if(table.equals("policyholder")){          ////////////////////////////////////////
+                else if(table.equals("policyholder")){          
                     if(rowCount == 0){
                         System.out.println("POLICY HOLDER DETAILS:");
                         System.out.println("===============================================================================================================================================");
@@ -366,7 +208,7 @@ public class PASRepository {
                     repoVehicleArray[rowCount] = new Vehicle(vehicleId, accountId, policyId, year, make, model, type, fuelType, color, purchasePrice, premium);
                 }
 
-                else if(table.equals("claim")){ //////////////////////////////////////////////////////////
+                else if(table.equals("claim")){ 
                     if(rowCount == 0){
                         System.out.println("CLAIM DETAILS: ");
                         System.out.println("===============================================================================================================================================");
@@ -390,7 +232,6 @@ public class PASRepository {
                     String estimatedCostOfRepInDol = String.format("$%.2f", estimatedCostOfRep);
 
                     System.out.printf("%-10s %10s %12s %15s %16s %18s %20s %20s \n",  claimNumber, policyNumber, accountNumber, dateOfAccStr, addAccHappen, descOfAcc, descOfDamage, estimatedCostOfRepInDol);
-
                 }      
                ++rowCount;
             }
@@ -401,8 +242,7 @@ public class PASRepository {
                 System.out.println("===============================================================================================================================================");
                 System.out.println("Records count = " + rowCount); // records count
                 exist =  true;
-            }
-            
+            }     
         } catch(SQLException ex) {
             ex.printStackTrace();   
         }
@@ -413,7 +253,5 @@ public class PASRepository {
     public void updateTable(String table, String columnChanges, String condition){
         String sqlCommand = "UPDATE " + table + " SET " + columnChanges + " WHERE " + condition;
         directCommandToDb(sqlCommand);
-
-    }
-    
+    }   
 }

@@ -36,6 +36,7 @@ public class PASApp {
                         service.searchDispClaim();
                         break;
                     case 8: //Program will exit
+                        System.out.println("\n =Program ENDED=\n");
                         System.exit(0);
                         break;               
 
@@ -58,9 +59,6 @@ public class PASApp {
 
 
         } while(numChoice != 8);
-
-        System.out.println("\n =Program ENDED=\n");
-        
 
         sc.close();
     }

@@ -1,16 +1,14 @@
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.Calendar;
 import java.util.Scanner;
 
 
 public class PolicyHolder {
 
     private int policyHolderId, policyId, accountId;
-
     private LocalDate dob, dateDxIssued;
-
-    private String address, drivLicNum, firstName, lastName;    
+    private String address, drivLicNum, firstName, lastName;
+    PASUIException except = new PASUIException();    
 
     Scanner sc = new Scanner(System.in);
 
@@ -33,45 +31,52 @@ public class PolicyHolder {
 
     public void createPolicyHolder(CustomerAccount repoAccount, Policy policy){
         this.accountId = policy.getAccountId();
-        System.out.println("\n==Please Provide details for Policy Holder Record creation==");
-        System.out.println("Is a policy for you or other person? ");
-        System.out.println("    [1] POLICY FOR THE ACCOUNT OWNER");
-        System.out.println("    [2] POLICY FOR OTHER PERSON");
-
         String inputChoice = null;
         String determiner = null;
-        while(inputChoice == null || ( inputChoice.equals("1") && inputChoice.equals("2") )){
+        boolean inputLoop = true;
+
+        while(inputLoop){
+            System.out.println("\n==Please Provide details for Policy Holder Record creation==");
+            System.out.println("Is a policy for you or other person? ");
+            System.out.println("    [1] POLICY FOR THE ACCOUNT OWNER");
+            System.out.println("    [2] POLICY FOR OTHER PERSON");
             System.out.print("  Input your choice [1 or 2] : ");
             inputChoice= sc.nextLine();
-
-            switch (inputChoice) {
-                case "1":
-                    determiner = " YOUR (ACCOUNT OWNER) ";
-                    this.firstName = repoAccount.getFirstName();
-                    this.lastName = repoAccount.getLastName();
-                    this.address = repoAccount.getAddress();
-                    System.out.println("\n*Account owners first name, last name and address was saved on the record*\n");
-                    break;
-
-                case "2":
-
-                    System.out.print("Enter POLICY HOLDER's FIRST NAME: ");
-                    this.firstName = sc.nextLine();
-                    System.out.print("Enter POLICY HOLDER's LAST NAME: ");
-                    this.lastName = sc.nextLine();
-                    System.out.print("Enter POLICY HOLDER's ADDRESS: ");
-                    this.address = sc.nextLine();
-                    determiner = " " + firstName +"'s";
-                    break;    
-            
-                default:
-                    System.out.println("\n Invalid: Out of Choices! Please input [1] or [2] only..\n");
-                    break;
-                
+            if(except.isNumeric(inputChoice, 1, 2)){
+                inputLoop = false;
+            }
+            else{
+                inputLoop = true;
             }
         }
 
-        boolean inputLoop = true;
+        switch (inputChoice) {
+            case "1":
+                determiner = " YOUR (ACCOUNT OWNER) ";
+                this.firstName = repoAccount.getFirstName();
+                this.lastName = repoAccount.getLastName();
+                this.address = repoAccount.getAddress();
+                System.out.println("\n*Account owners first name, last name and address was saved on the record*\n");
+                break;
+
+            case "2":
+
+                System.out.print("Enter POLICY HOLDER's FIRST NAME: ");
+                this.firstName = sc.nextLine();
+                System.out.print("Enter POLICY HOLDER's LAST NAME: ");
+                this.lastName = sc.nextLine();
+                System.out.print("Enter POLICY HOLDER's ADDRESS: ");
+                this.address = sc.nextLine();
+                determiner = " " + firstName +"'s";
+                break;    
+        
+            default:
+                System.out.println("\n Invalid: Out of Choices! Please input [1] or [2] only..\n");
+                break;
+            
+        }
+
+        inputLoop = true;
         while(inputLoop){
             System.out.print("Enter" + determiner +" BIRTH YEAR (YYYY) : ");
             String birthYear = sc.next();
@@ -80,15 +85,17 @@ public class PolicyHolder {
             System.out.print("Enter" + determiner + " BIRTH DAY (1-31): ");
             String birthDay = sc.next();
 
-            if (dateValid(birthYear, birthMonth, birthDay)){
+            if(except.isNumeric(birthMonth, 1, 12) && except.isNumeric(birthDay, 1, 31)){
                 birthDay = String.format("%02d", Integer.parseInt(birthDay));
                 birthMonth = String.format("%02d", Integer.parseInt(birthMonth));
                 String dobStr = birthYear + "-" + birthMonth + "-" + birthDay;
-                this.dob = LocalDate.parse(dobStr);
-                inputLoop = false;
-            }
-            else{
-                System.out.println("\nInvalid:Please input a valid Date!\n");
+                if (except.dateValid(dobStr, "1000-01-01", "now")){
+                    this.dob = LocalDate.parse(dobStr);
+                    inputLoop = false;
+                }
+                else{
+                    inputLoop = true;
+                }
             }
         }
 
@@ -103,62 +110,26 @@ public class PolicyHolder {
             String monthDxIssued = sc.next();
             System.out.print("Enter the DAY when "+ determiner + "LICENSE was 1ST ISSUED (1-31) : ");
             String dayDxIssued = sc.next();
-            
-            if (dateValid(yearDxIssued, monthDxIssued, dayDxIssued)){
+
+            if(except.isNumeric(monthDxIssued, 1, 12) && except.isNumeric(dayDxIssued, 1, 31)){
                 monthDxIssued = String.format("%02d", Integer.parseInt(monthDxIssued));
                 dayDxIssued = String.format("%02d", Integer.parseInt(dayDxIssued));
-                String dobStr = yearDxIssued + "-" + monthDxIssued + "-" + dayDxIssued;
-                this.dateDxIssued = LocalDate.parse(dobStr);
-                inputLoop = false;
+                String dateIssued = yearDxIssued + "-" + monthDxIssued + "-" + dayDxIssued;
+                if (except.dateValid(dateIssued, "1000-01-01", "now")){
+                    this.dateDxIssued = LocalDate.parse(dateIssued);
+                    inputLoop = false;
+                }
+                else{
+                    inputLoop = true;
+                }
             }
             else{
-                System.out.println("\nInvalid:Please input a valid Date!\n");
+                inputLoop = true;
             }
         }
 
         policy.setDlx(getDlx());
         
-    }
-
-    public boolean isNumeric(String inputString) {
-        //check for null and empty string
-        if (inputString == null || inputString.length() == 0) {
-          return false;
-        }
-        try {
-          Integer.parseInt(inputString);
-          return true;
-        } catch (NumberFormatException exception) {
-          return false;
-        }
-    }
-
-    public boolean dateValid(String inputYearStr, String inputMonthStr, String inputDayStr){
-        boolean validInput = false;
-        Calendar calendar = Calendar.getInstance();
-        if(isNumeric(inputMonthStr) && isNumeric(inputYearStr) && isNumeric(inputDayStr)){
-            int currentYear = calendar.get(Calendar.YEAR);
-            int currentMonth = calendar.get(Calendar.MONTH) + 1;
-            int currentDay = calendar.get(Calendar.DAY_OF_MONTH);
-            int inputYear = Integer.parseInt(inputYearStr);
-            int inputMonth = Integer.parseInt(inputMonthStr);
-            int inputDay = Integer.parseInt(inputDayStr);
-          
-            if(inputMonthStr.length() > 2 && inputDayStr.length() > 2 && inputYearStr.length() != 4){
-                System.out.println("\n Invalid Date: Please follow the input format for date!\n" );
-                validInput = false;
-                return validInput;
-            }
-            else{
-                validInput = true;
-                return validInput;
-            }
-        }
-        else{
-            System.out.println("\n Invalid Date: Please input a valid number format DATE!\n" );
-            validInput = false;
-            return false;
-        }
     }
 
     public int getDlx(){

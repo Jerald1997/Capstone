@@ -7,6 +7,7 @@ public class RatingEngine  {
         double purchasePrice = policy.getPurchasePrice();
         
         int dlx = policy.getDlx();
+        Double dlxDouble = Double.valueOf(dlx);
 
         int carYearAge = policy.getCarYear();
 
@@ -37,7 +38,7 @@ public class RatingEngine  {
             priceFactor = 0.1f;
         }
 
-        this.eachVehiclePremium = ( purchasePrice * priceFactor) + ((purchasePrice/100)/dlx);
+        this.eachVehiclePremium = ( purchasePrice * priceFactor) + ((purchasePrice/100)/dlxDouble);
 
         policyPremium += eachVehiclePremium;
     }

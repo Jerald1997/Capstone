@@ -10,6 +10,7 @@ public class Vehicle{
     public Vehicle(){
     }
     
+    // a constructor that accepts data according to columns of vehicle table of database
     public Vehicle(int vehicleId, int accountId, int policyId, int year, String make, String model, String type,
             String fuelType, String color, double purchasePrice, double eachVehiclePremium) {
         this.vehicleId = vehicleId;
@@ -27,6 +28,7 @@ public class Vehicle{
 
     Scanner sc = new Scanner(System.in);
 
+    // filling data for Vehicle object by user input and data from CustomerAccount and Policy, and Rating Engine object parameter
     public void createVehicle(CustomerAccount repoAccount, Policy policy, int counter, RatingEngine ratingEngine){
         System.out.println("\n==Please Provide details for Vehicle/s Record creation==");
 
@@ -110,7 +112,7 @@ public class Vehicle{
         return vehicleNum;
     }
 
-    public void dispPremiumBreakDown(int vehicleNum, Vehicle[] vehicleArray){
+    public void dispPremiumBreakDown(int vehicleNum, Vehicle[] vehicleArray){  //responsible for displaying the breakdown from array of vehicle objects
 
         System.out.printf("%-10s %10s %10s %10s %10s %15s", "Vehicle", "Make", "Model", "Year" , "Color", "Unit Premium");
         System.out.println("\n----------------------------------------------------------------------------------------");

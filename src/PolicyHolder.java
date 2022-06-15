@@ -15,7 +15,7 @@ public class PolicyHolder {
     public PolicyHolder(){
 
     }
-
+        // a constructor that accepts data according to columns of policyholder table of database
     public PolicyHolder(int policyHolderId, int policyId, int accountId, String firstName, String lastName, String address, String dob,
                          String drivLicNum, String dateDxIssued) {
             this.policyHolderId = policyHolderId;
@@ -29,7 +29,7 @@ public class PolicyHolder {
             this.lastName = lastName;
     }
 
-    public void createPolicyHolder(CustomerAccount repoAccount, Policy policy){
+    public void createPolicyHolder(CustomerAccount repoAccount, Policy policy){  // filling data for PolicyHolder object by user input and data from CustomerAccount and Policy object parameter
         this.accountId = policy.getAccountId();
         String inputChoice = null;
         String determiner = null;

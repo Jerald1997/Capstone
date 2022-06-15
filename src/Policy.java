@@ -8,6 +8,7 @@ public class Policy extends Vehicle{
     private double policyPremium;   
     PASUIException except = new PASUIException();   
 
+    // a constructor that accepts data according to columns of policy table of database
     public Policy (int policyId, int accountId, String effectDateStr, String expiretDateStr, double policyPremium, int vehicleNum){
         this.policyId = policyId;
         this.accountId = accountId;
@@ -24,7 +25,7 @@ public class Policy extends Vehicle{
 
     Scanner sc = new Scanner(System.in);
 
-    public void createPolicy(CustomerAccount repoAccount){
+    public void createPolicy(CustomerAccount repoAccount){   // method filling policy object by user input and data from CustomerAccount object
         this.accountId = repoAccount.getAccountId();
         boolean inputLoop = true;
         while(inputLoop){                                      // effective date input (must be correct format)
@@ -55,7 +56,7 @@ public class Policy extends Vehicle{
         
     }
 
-    public int askForPolicyNumber(){
+    public int askForPolicyNumber(){            // ask user for policy number and return
         int policyNumber = 0;
         boolean inputLoop = true;
         while(inputLoop){
@@ -73,7 +74,7 @@ public class Policy extends Vehicle{
         return policyNumber;
     }
 
-    public String askForUpdatedDate(){
+    public String askForUpdatedDate(){          // ask user for update expiration date and return
         String updatedExpDate = null;
         boolean inputLoop = true;
         while(inputLoop) {
@@ -99,7 +100,7 @@ public class Policy extends Vehicle{
         return updatedExpDate;
     }
 
-    public boolean askForPolicyAccept(){
+    public boolean askForPolicyAccept(){    // ask user for acceptance confirmation and return TRUE if user ACCEPT
         boolean accept = false;
         boolean inputLoop = true;
         sc = new Scanner(System.in);

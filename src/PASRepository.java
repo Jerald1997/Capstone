@@ -1,3 +1,8 @@
+/**  REPOSITORY CLASS or DATABASE CONNECTION CLASS (helper)
+ * Handles connection to database
+ * Handles saving, updating, searching, display and creation of object from database data
+ */
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -9,13 +14,13 @@ public class PASRepository {
     String sqlCommand, details;
     boolean exist;
 
-    CustomerAccount repoAccount;
-    Policy repoPolicy;
-    PolicyHolder repoPolicyHolder;
-    Vehicle[] repoVehicleArray;
-    Claim repoClaim;
+    CustomerAccount repoAccount;        // repository object that will be created using data from database 
+    Policy repoPolicy;                  //
+    PolicyHolder repoPolicyHolder;      //
+    Vehicle[] repoVehicleArray;         // *array due to possibility of multiple vehicle in one policy
+    Claim repoClaim;                    //
     
-    public void directCommandToDb(String sqlCommand){
+    public void directCommandToDb(String sqlCommand){       // a method that accept valid sql query/command in string format
         try (
             // a database connection "conn"
             Connection conn = DriverManager.getConnection( "jdbc:mysql://localhost:3306/pas_system","root", "JR@norima2022"); 
@@ -28,7 +33,7 @@ public class PASRepository {
         }
     }
 
-    public void saveeToDb(CustomerAccount account){
+    public void saveeToDb(CustomerAccount account){      // a method that handles saving of data from CustomerAccount object to database 
         String firstName = account.getFirstName();
         String lastName = account.getLastName();
         String address = account.getAddress();
@@ -39,7 +44,7 @@ public class PASRepository {
         System.out.println("\n  \n ACCOUNT CREATION SUCCESSFUL! \n \n");
     }
 
-    public void saveeToDb(Policy policy){
+    public void saveeToDb(Policy policy){           // a method that handles saving of data from Policy object to database
         LocalDate effectDate = policy.getEffectDate();
         LocalDate expireDate = policy.getExpireDate();
         int accountId = policy.getAccountId();
@@ -53,7 +58,7 @@ public class PASRepository {
         System.out.println("\n  \n POlICY (6-MONTHS FROM DATE OF EFFECTIVITY) TERM SAVED! \n \n");
     }
 
-    public void saveeToDb(PolicyHolder policyHolder){
+    public void saveeToDb(PolicyHolder policyHolder){       // a method that handles saving of data from Policy Holder object to database 
         String firstName = policyHolder.getFirstName();
         String lastName = policyHolder.getLastName();
         int accountId = policyHolder.getAccountId();
@@ -68,7 +73,7 @@ public class PASRepository {
                         + " VALUES " + details + ";" );
     }
 
-    public void saveeToDb(Vehicle vehicle){
+    public void saveeToDb(Vehicle vehicle){               // a method that handles saving of data from Vehicle object to database
         int accountId = vehicle.getAccountId();
         int policyId = vehicle.getPolicyId();
         String make = vehicle.getMake();
@@ -85,7 +90,7 @@ public class PASRepository {
                         + " VALUES " + details + ";" );
     }
 
-    public void saveeToDb(Claim claim){
+    public void saveeToDb(Claim claim){         // a method that handles saving of data from Claim object to database
         int policyId = claim.getPolicyId();
         int accountId = claim.getAccountId();
         LocalDate dateOfAcc = claim.getDateOfAcc();
@@ -100,8 +105,8 @@ public class PASRepository {
     }
 
 
-    public boolean selectDisplayTable(String table, String commExtension){
-        exist = false;
+    public boolean selectDisplayTable(String table, String commExtension){   //a method responsible for selection, returning if false if not exist display database like format of data table
+        exist = false;                                                         // and also responsible for object creation from database data (repository object [ex. repoPolicy])
         try (
             // a database connection "conn"
             Connection conn = DriverManager.getConnection( "jdbc:mysql://localhost:3306/pas_system","root", "JR@norima2022"); 
@@ -114,7 +119,7 @@ public class PASRepository {
             while(rset.next()) {   // Repeatedly process each row
                 if (table.equals("account")){
                     if(rowCount == 0){
-                        System.out.println("ACCOUNT DETAILS:");
+                        System.out.println("\nACCOUNT DETAILS:");
                         System.out.println("===============================================================================================================================================");
                         System.out.printf("%-10s %20s %20s %20s \n", "AccountID", "First Name", "Last Name" , "Address");
                         System.out.println("-----------------------------------------------------------------------------------------------------------------------------------------------");
@@ -127,12 +132,12 @@ public class PASRepository {
                         
                         System.out.printf("%-10s %20s %20s %20s \n", accountNumber, firstName, lastName, address);
         
-                    repoAccount = new CustomerAccount(accountId, firstName, lastName, address); 
+                    repoAccount = new CustomerAccount(accountId, firstName, lastName, address);    //repository object account
                 }
                     
                 else if(table.equals("policy")){   
                     if(rowCount == 0){
-                        System.out.println("POLICY DETAILS:");
+                        System.out.println("\nPOLICY DETAILS:");
                         System.out.println("===============================================================================================================================================");
                         System.out.printf("%-10s %20s %20s %20s %20s %29s\n", "PolicyID", "AccountID", "Effectivity Date", "Expiration Date" , "Policy Premium", "No. of Vehicle Enrolled");
                         System.out.println("-----------------------------------------------------------------------------------------------------------------------------------------------");
@@ -145,7 +150,7 @@ public class PASRepository {
                     double policyPremium = rset.getDouble("policyPremium");
                     int vehicleNum = rset.getInt("vehicleNum");
 
-                    repoPolicy = new Policy(policyId, accountId, effectDate, expireDate, policyPremium, vehicleNum); 
+                    repoPolicy = new Policy(policyId, accountId, effectDate, expireDate, policyPremium, vehicleNum); //repository object policy
 
                     String policyNumber = repoPolicy.toPolicyNumConfig(policyId);
                     String accountNumber = String.format("%04d", accountId); 
@@ -156,7 +161,7 @@ public class PASRepository {
                 
                 else if(table.equals("policyholder")){          
                     if(rowCount == 0){
-                        System.out.println("POLICY HOLDER DETAILS:");
+                        System.out.println("\nPOLICY HOLDER DETAILS:");
                         System.out.println("===============================================================================================================================================");
                         System.out.printf("%-15s %10s %15s %15s %12s %15s %20s %20s \n",  "PolicyID", "AccountID", "FirstName", "Last Name", "Address" , "DOB", "Driv.Lic Number", "Dx 1st Issued Date");
                         System.out.println("-----------------------------------------------------------------------------------------------------------------------------------------------");
@@ -175,13 +180,13 @@ public class PASRepository {
                     String policyNumber = String.format("%06d", policyId);
                     System.out.printf("%-15s %10s %15s %15s %12s %15s %20s %20s \n", policyNumber, accountNumber, firstName, lastName, address , dob, drivLicNum, drivLic1stIssDate);
                     
-                    repoPolicyHolder = new PolicyHolder(policyHolderId, policyId, accountId, firstName, lastName, address, dob, drivLicNum,drivLic1stIssDate); 
+                    repoPolicyHolder = new PolicyHolder(policyHolderId, policyId, accountId, firstName, lastName, address, dob, drivLicNum,drivLic1stIssDate); //repository object policy holder
                 }
 
                 else if(table.equals("vehicles")){
                     repoVehicleArray = new Vehicle[repoPolicy.getVehicleNum()];
                     if(rowCount == 0){
-                        System.out.println("VEHICLE DETAILS:");
+                        System.out.println("\nVEHICLE DETAILS:");
                         System.out.println("===============================================================================================================================================");
                         System.out.printf("%-12s %10s %10s %10s %7s %13s %15s %15s %12s %13s\n", "Policy ID", "Account ID", "Make", "Model" , "Year", "Type", "Fuel Type", "Purchase Price", "Color", "Premium");
                         System.out.println("-----------------------------------------------------------------------------------------------------------------------------------------------");                   
@@ -205,12 +210,12 @@ public class PASRepository {
                     
                     System.out.printf("%-12s %10s %10s %10s %7d %13s %15s %15s %12s %13s\n", policyNumber, accountNumber, make, model , year, type, fuelType, purchPriceInDoll, color, premiumInDoll);
                     
-                    repoVehicleArray[rowCount] = new Vehicle(vehicleId, accountId, policyId, year, make, model, type, fuelType, color, purchasePrice, premium);
+                    repoVehicleArray[rowCount] = new Vehicle(vehicleId, accountId, policyId, year, make, model, type, fuelType, color, purchasePrice, premium);  //repository object vehicle (array depends on no. of vehicle on policy)
                 }
 
                 else if(table.equals("claim")){ 
                     if(rowCount == 0){
-                        System.out.println("CLAIM DETAILS: ");
+                        System.out.println("\nCLAIM DETAILS: ");
                         System.out.println("===============================================================================================================================================");
                         System.out.printf("%-10s %10s %12s %15s %16s %18s %20s %20s \n",  "ClaimID", "PolicyID", "AccountID", "Accident Date", "Acc. Address" , "Acc. Description", "Damage Description", "Repair Est.Cost");
                         System.out.println("-----------------------------------------------------------------------------------------------------------------------------------------------");
@@ -224,7 +229,7 @@ public class PASRepository {
                     String descOfDamage = rset.getString("descOfDamage");
                     Double estimatedCostOfRep = rset.getDouble("estimatedCostOfRep");
 
-                    repoClaim = new Claim(claimId, policyId, accountId, dateOfAccStr, addAccHappen, descOfAcc, descOfDamage, estimatedCostOfRep);
+                    repoClaim = new Claim(claimId, policyId, accountId, dateOfAccStr, addAccHappen, descOfAcc, descOfDamage, estimatedCostOfRep); //repository object claim
                     
                     String claimNumber = repoClaim.toClaimNumberConfig(claimId);
                     String policyNumber = String.format("%06d", policyId);
@@ -250,7 +255,7 @@ public class PASRepository {
 
     }
 
-    public void updateTable(String table, String columnChanges, String condition){
+    public void updateTable(String table, String columnChanges, String condition){              //update query for changing data of database
         String sqlCommand = "UPDATE " + table + " SET " + columnChanges + " WHERE " + condition;
         directCommandToDb(sqlCommand);
     }   

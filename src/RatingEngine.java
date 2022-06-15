@@ -1,9 +1,9 @@
 public class RatingEngine  {
 
     private double eachVehiclePremium;
-    static private double policyPremium;
+    static private double policyPremium;   // Static total of each vehicle premium
 
-    RatingEngine(Policy policy){
+    RatingEngine(Policy policy){                       // rating engine constructor that accepts Policy object only 
         double purchasePrice = policy.getPurchasePrice();
         
         int dlx = policy.getDlx();
@@ -38,9 +38,9 @@ public class RatingEngine  {
             priceFactor = 0.1f;
         }
 
-        this.eachVehiclePremium = ( purchasePrice * priceFactor) + ((purchasePrice/100)/dlxDouble);
+        this.eachVehiclePremium = ( purchasePrice * priceFactor) + ((purchasePrice/100)/dlxDouble);   // Premium Formula
 
-        policyPremium += eachVehiclePremium;
+        policyPremium += eachVehiclePremium;        // each vehicle premium addition for static total policyPremium
     }
 
     public double getEachVehiclePremium() {
@@ -51,7 +51,7 @@ public class RatingEngine  {
         return policyPremium;
     }
 
-    public static void setPolicyPremium(double policyPremium) {
+    public static void setPolicyPremium(double policyPremium) {   // for setting the static policy Premium to ZERO after creation of each policy
         RatingEngine.policyPremium = policyPremium;
     }
 

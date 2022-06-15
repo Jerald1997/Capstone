@@ -12,6 +12,7 @@ public class Claim {
     public Claim(){
     }
 
+        // a constructor that accepts data according to columns of claim table of database
     public Claim(int claimId, int policyId, int accountId, String dateOfAccStr, String addAccHappen, String descOfAcc, String descOfDamage,
              double estimatedCostOfRep) {
         this.claimId = claimId;
@@ -26,7 +27,7 @@ public class Claim {
 
     Scanner sc = new Scanner(System.in);
 
-    public void createClaim(Policy repoPolicy){
+    public void createClaim(Policy repoPolicy){         // filling of claim object data by user input and data from parameter repoPolicy object
         this.policyId = repoPolicy.getPolicyId();
         this.accountId = repoPolicy.getAccountId();
         
@@ -76,30 +77,32 @@ public class Claim {
         
     }
 
-    public String toClaimNumberConfig(int claimId){
+    public String toClaimNumberConfig(int claimId){     // Converting from ID (int) to NUMBER (String) [ex.: claimId = 1 to claimNumber = C00001]       
         String claimNumber = String.format("C%05d",claimId);
         return claimNumber;
     }
 
-    public int toClaimIdConfig(String claimNumber){
+    public int toClaimIdConfig(String claimNumber){     // Converting from NUMBER (String) to ID (int) [ex.: claimNumber = C00001 to claimId = 1] 
         String claimIdStr = claimNumber.substring(1, claimNumber.length());
         int claimId = Integer.parseInt(claimIdStr);
         return claimId;
     }
 
-    public String askForClaimNumber(){
+    public String askForClaimNumber(){              // ask user for claim number and return 
         boolean inputLoop = true;
         String claimNumber = null;
         while(inputLoop){
             System.out.print("Enter (Cxxxxxx) CLAIM NUMBER [ex.: C12345] : ");
             claimNumber = sc.nextLine();
-            String claimIdStr = claimNumber.substring(1, claimNumber.length());
-            if((claimNumber.charAt(0) == 'c' || claimNumber.charAt(0) == 'C') && claimNumber.length() == 6 && except.isNumeric(claimIdStr,1, 99999)){;
-                inputLoop = false;
-            }
-            else{
-                System.out.println("\nPlease enter a valid Claim Number (Cxxxxx) [ex.: C12345]\n");
-                inputLoop = true;
+            if(!claimNumber.equals("")){
+                String claimIdStr = claimNumber.substring(1, claimNumber.length());
+                if((claimNumber.charAt(0) == 'c' || claimNumber.charAt(0) == 'C') && claimNumber.length() == 6 && except.isNumeric(claimIdStr,1, 99999)){;
+                    inputLoop = false;
+                }
+                else{
+                    System.out.println("\nPlease enter a valid Claim Number (Cxxxxx) [ex.: C12345]\n");
+                    inputLoop = true;
+                }
             }
         }
         return claimNumber;

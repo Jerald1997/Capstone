@@ -1,13 +1,18 @@
+/**  USER INPUT EXCEPTION CLASS (helper)
+ * This class handles exception from user input for number and date
+ */
+
 import java.time.LocalDate;
 import java.time.Period;
 
-public class PASUIException {
+public class PASUIException { 
     PASUIException(){
+
 
     }
 
-    public boolean isNumeric(String inputString, int min, int max){
-        boolean valid = false;
+    public boolean isNumeric(String inputString, int min, int max){   // test if input is a number and also test if its within the valid range (min and max)
+        boolean valid = false;                                        // only return TRUE if input is number and within valid range [ex.: Month (1-12 only)]
         if (!inputString.equals(null)) {
             try {
                 Double numberDouble = Double.parseDouble(inputString);
@@ -28,8 +33,8 @@ public class PASUIException {
         return valid;
     }
 
-    public boolean dateValid(String dateToTestStr, String minDateStr, String maxDateStr){
-        boolean valid = false;
+    public boolean dateValid(String dateToTestStr, String minDateStr, String maxDateStr){       // test if input is a valid date and also test if its within the valid range of date (min and max)
+        boolean valid = false;                                                                  // only return TRUE if input is valid date and within valid range 
         try {
             LocalDate testDate = LocalDate.parse(dateToTestStr);
             LocalDate minDate, maxDate;

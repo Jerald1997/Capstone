@@ -79,11 +79,11 @@ public class PolicyHolder {
         inputLoop = true;
         while(inputLoop){
             System.out.print("Enter" + determiner +" BIRTH YEAR (YYYY) : ");
-            String birthYear = sc.next();
+            String birthYear = sc.nextLine();
             System.out.print("Enter" + determiner + " BIRTH MONTH (1-12): ");
-            String birthMonth = sc.next();
+            String birthMonth = sc.nextLine();
             System.out.print("Enter" + determiner + " BIRTH DAY (1-31): ");
-            String birthDay = sc.next();
+            String birthDay = sc.nextLine();
 
             if(except.isNumeric(birthMonth, 1, 12) && except.isNumeric(birthDay, 1, 31)){
                 birthDay = String.format("%02d", Integer.parseInt(birthDay));
@@ -100,16 +100,16 @@ public class PolicyHolder {
         }
 
         System.out.print("Enter your DRIVER's LICENSE NUMBER: ");
-        this.drivLicNum = sc.next();
+        this.drivLicNum = sc.nextLine();
 
         inputLoop = true;
         while(inputLoop){
             System.out.print("Enter the YEAR when "+ determiner + "LICENSE was 1ST ISSUED (YYYY) : ");
-            String yearDxIssued = sc.next();
+            String yearDxIssued = sc.nextLine();
             System.out.print("Enter the MONTH when "+ determiner + "LICENSE was 1ST ISSUED (1-12) : ");
-            String monthDxIssued = sc.next();
+            String monthDxIssued = sc.nextLine();
             System.out.print("Enter the DAY when "+ determiner + "LICENSE was 1ST ISSUED (1-31) : ");
-            String dayDxIssued = sc.next();
+            String dayDxIssued = sc.nextLine();
 
             if(except.isNumeric(monthDxIssued, 1, 12) && except.isNumeric(dayDxIssued, 1, 31)){
                 monthDxIssued = String.format("%02d", Integer.parseInt(monthDxIssued));
@@ -129,6 +129,7 @@ public class PolicyHolder {
         }
 
         policy.setDlx(getDlx());
+        
         
     }
 

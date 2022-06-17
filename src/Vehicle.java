@@ -94,12 +94,13 @@ public class Vehicle{
     }
     
     public int askForVehicleNum(){
-        System.out.print("How many vehicles you want to add on the policy? ");
-        String vehicleNumStr = sc.nextLine();
         int vehicleNum = 0;
+        String vehicleNumStr = null;
 
         boolean inputLoop = true;
         while (inputLoop){
+            System.out.print("How many vehicles you want to add on the policy? ");
+            vehicleNumStr = sc.nextLine();
             if(except.isNumeric(vehicleNumStr,1, 999999)){
                 vehicleNum = Integer.parseInt(vehicleNumStr);
                 return vehicleNum;

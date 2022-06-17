@@ -104,11 +104,11 @@ public class PolicyHolder {
 
         inputLoop = true;
         while(inputLoop){
-            System.out.print("Enter the YEAR when "+ determiner + "LICENSE was 1ST ISSUED (YYYY) : ");
+            System.out.print("Enter the YEAR when "+ determiner + " LICENSE was 1ST ISSUED (YYYY) : ");
             String yearDxIssued = sc.nextLine();
-            System.out.print("Enter the MONTH when "+ determiner + "LICENSE was 1ST ISSUED (1-12) : ");
+            System.out.print("Enter the MONTH when "+ determiner + " LICENSE was 1ST ISSUED (1-12) : ");
             String monthDxIssued = sc.nextLine();
-            System.out.print("Enter the DAY when "+ determiner + "LICENSE was 1ST ISSUED (1-31) : ");
+            System.out.print("Enter the DAY when "+ determiner + " LICENSE was 1ST ISSUED (1-31) : ");
             String dayDxIssued = sc.nextLine();
 
             if(except.isNumeric(monthDxIssued, 1, 12) && except.isNumeric(dayDxIssued, 1, 31)){
